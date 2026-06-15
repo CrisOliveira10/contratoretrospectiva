@@ -2,30 +2,25 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Contrato de Retrospectiva</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        body { font-family: sans-serif; background: #fff; padding: 10px; margin: 0; }
-        .container { width: 100%; max-width: 600px; margin: auto; }
-        img { width: 100%; max-width: 200px; display: block; margin: 0 auto 15px; }
+        body { font-family: sans-serif; background: #fff; padding: 20px; }
+        .container { max-width: 600px; margin: auto; }
         canvas { border: 2px solid #ccc; width: 100%; height: 200px; touch-action: none; background: #fafafa; }
-        .btn { background: #25d366; color: white; padding: 15px; width: 100%; border: none; cursor: pointer; font-size: 18px; border-radius: 5px; margin-top: 15px;}
-        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
-        .checkbox-container { background:#fff3cd; padding:15px; margin:15px 0; display: flex; align-items: center; gap: 10px; border-radius: 5px; }
+        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        button { background: #25d366; color: white; padding: 15px; width: 100%; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 <div class="container">
-    <img src="https://res.cloudinary.com/dtshawz5x/image/upload/v1780435649/logotipo_jhde8q.png">
-    <h1>Contrato de Prestação</h1>
-    <label>Nome Completo:</label><input type="text" id="nome">
-    <label>E-mail:</label><input type="email" id="email">
-    <label>WhatsApp:</label><input type="tel" id="whatsInput">
-    <label>Data do Evento:</label><input type="date" id="dataEvento">
-    <label>Tema da Festa:</label><input type="text" id="tema">
-    <label>Termos:</label>
-    <textarea id="termosArea" readonly style="height:150px; font-size: 12px;"># REGRAS E INFORMAÇÕES DA RETROSPECTIVA
+    <img src="https://res.cloudinary.com/dtshawz5x/image/upload/v1780435649/logotipo_jhde8q.png" style="width:150px; display:block; margin:auto;">
+    <input type="text" id="nome" placeholder="Nome do Cliente">
+    <input type="email" id="email" placeholder="Email">
+    <input type="tel" id="whatsInput" placeholder="WhatsApp">
+    <input type="date" id="dataEvento">
+    <input type="text" id="tema" placeholder="Tema">
+    <textarea id="termosArea" readonly style="height:100px; font-size:10px;"># REGRAS E INFORMAÇÕES DA RETROSPECTIVA
 
 1. Informações Visuais da Festa
 Você deverá me enviar informações visuais da festa para que eu possa entender a proposta do evento. Exemplos: Fotos da decoração; Convite da festa.
@@ -76,83 +71,58 @@ Tenha certeza da ordem das fotos enviadas. A retrospectiva será produzida exata
 
 16. Responsabilidade Após Aprovação Final
 Após assistir à retrospectiva final e informar que está tudo correto, não serão aceitas reclamações relacionadas à reprodução do vídeo no dia da festa. Problemas como: Pen drive corrompido, falha ao baixar ou transferir o arquivo, equipamentos com defeito, problemas de configuração, outros fatores externos, são de responsabilidade do cliente e não do fornecedor da retrospectiva. Ao aprovar a versão final, entende-se que o serviço foi concluído e entregue corretamente.</textarea>
-    
-    <label>Assinatura:</label>
     <canvas id="canvas"></canvas>
-    <button onclick="clearCanvas()" style="width:100%; padding:10px; background:#ff4757; color:white; border:none; margin-top:5px;">Limpar Assinatura</button>
-    
-    <div class="checkbox-container">
-        <input type="checkbox" id="aceite" style="width: auto;"> 
-        <b>Declaro que li e concordo com todas as cláusulas (itens 1 ao 16).</b>
-    </div>
-    <button class="btn" onclick="gerarPDF()">Gerar PDF e Enviar WhatsApp</button>
+    <button onclick="clearCanvas()" style="background:#ff4757; margin-bottom:10px;">Limpar Assinatura</button>
+    <div style="background:#fff3cd; padding:10px;"><input type="checkbox" id="aceite"> <b>Declaro que li e concordo com os itens 1 ao 16.</b></div>
+    <button onclick="gerarPDF()">Gerar PDF e Enviar WhatsApp</button>
 </div>
 <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2;
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    
-    let drawing = false;
-    function getPos(e) {
-        const rect = canvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return { x: clientX - rect.left, y: clientY - rect.top };
-    }
-    
+    const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d'); ctx.lineWidth = 3; let drawing = false;
+    function getPos(e) { const r = canvas.getBoundingClientRect(); const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left; const y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top; return {x, y}; }
     canvas.onmousedown = (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); };
-    canvas.onmouseup = () => drawing = false;
     canvas.onmousemove = (e) => { if(!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+    canvas.onmouseup = () => drawing = false;
     canvas.ontouchstart = (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); };
-    canvas.ontouchend = () => drawing = false;
     canvas.ontouchmove = (e) => { e.preventDefault(); if(!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+    canvas.ontouchend = () => drawing = false;
     function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-    
-    function gerarPDF() {
+
+    async function gerarPDF() {
         if(!document.getElementById('aceite').checked) { alert('Marque o aceite!'); return; }
+        const res = await fetch('https://api.ipify.org?format=json');
+        const ip = (await res.json()).ip;
+        const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(document.getElementById('nome').value + ip)))).map(b => b.toString(16).padStart(2, '0')).join('');
+        
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
+        doc.addImage("https://res.cloudinary.com/dtshawz5x/image/upload/v1780435649/logotipo_jhde8q.png", 'PNG', 80, 10, 50, 20);
         
-        // Logo
-        const img = new Image();
-        img.src = "https://res.cloudinary.com/dtshawz5x/image/upload/v1780435649/logotipo_jhde8q.png";
-        doc.addImage(img, 'PNG', 80, 10, 50, 20);
+        // DADOS DO CLIENTE EXATOS
+        doc.setFontSize(10);
+        doc.text("DADOS DO CLIENTE", 10, 40);
+        doc.text("Nome: " + document.getElementById('nome').value, 10, 45);
+        doc.text("Email: " + document.getElementById('email').value, 10, 50);
+        doc.text("WhatsApp: " + document.getElementById('whatsInput').value, 10, 55);
+        doc.text("Data: " + document.getElementById('dataEvento').value, 10, 60);
+        doc.text("Tema: " + document.getElementById('tema').value, 10, 65);
+        doc.text("Aceite: Cliente assinou e concordou com as regras.", 10, 70);
+        doc.text("IP: " + ip, 10, 75);
+        doc.text("Hash: " + hash.substring(0,20) + "...", 10, 80);
         
-        doc.setFontSize(14);
-        doc.text("CONTRATO DE PRESTACAO DE SERVICOS", 105, 40, {align: 'center'});
-        
-        doc.setFontSize(9);
-        doc.text("PRESTADORA: Cristiane Oliveira | TEL: 71993233142", 105, 50, {align: 'center'});
-        
-        // Dados do Cliente
-        doc.text("DADOS DO CLIENTE", 10, 65);
-        doc.text("Nome: " + document.getElementById('nome').value, 10, 75);
-        doc.text("Email: " + document.getElementById('email').value, 10, 80);
-        doc.text("WhatsApp: " + document.getElementById('whatsInput').value, 10, 85);
-        doc.text("Data: " + document.getElementById('dataEvento').value, 10, 90);
-        doc.text("Tema: " + document.getElementById('tema').value, 10, 95);
-        
-        // Aceite
-        doc.text("Aceite: Cliente assinou e concordou com as regras.", 10, 105);
-        
-        // Termos Completos
-        let y = 120; 
-        const lines = doc.splitTextToSize(document.getElementById('termosArea').value, 180);
-        lines.forEach(line => {
-            if (y > 270) { doc.addPage(); y = 20; }
-            doc.text(line, 10, y);
-            y += 5;
+        // TERMOS COMPLETOS
+        let y = 90;
+        doc.splitTextToSize(document.getElementById('termosArea').value, 180).forEach(l => { 
+            if(y > 270) { doc.addPage(); y = 20; }
+            doc.text(l, 10, y); 
+            y += 5; 
         });
         
-        if (y > 250) { doc.addPage(); y = 20; }
-        doc.text("Assinatura do Cliente:", 10, y + 10);
-        doc.addImage(canvas.toDataURL(), 'PNG', 10, y + 15, 50, 20);
-        
+        doc.addImage(canvas.toDataURL(), 'PNG', 10, y + 10, 50, 20);
         doc.save('Contrato.pdf');
-        window.open('https://wa.me/5571993233142?text=Enviei o contrato assinado.');
+
+        // MENSAGEM WHATSAPP EXATA
+        const msg = `*CONTRATO ASSINADO*%0A%0ADADOS DO CLIENTE%0ANome: ${document.getElementById('nome').value}%0AEmail: ${document.getElementById('email').value}%0AWhatsApp: ${document.getElementById('whatsInput').value}%0AData: ${document.getElementById('dataEvento').value}%0ATema: ${document.getElementById('tema').value}%0AAceite: Cliente assinou e concordou com as regras.%0AIP: ${ip}%0AHash: ${hash.substring(0,20)}...%0A%0ATermos aceitos (1-16)`;
+        window.open('https://wa.me/5571993233142?text=' + msg);
     }
 </script>
 </body>
