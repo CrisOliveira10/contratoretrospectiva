@@ -14,7 +14,7 @@
 </head>
 <body>
 <div class="container">
-    <img src="https://res.cloudinary.com/dtshawz5x/image/upload/v1780435649/logotipo_jhde8q.png" style="width:150px; display:block; margin:auto;">
+    <img src="https://res.cloudinary.com/dlbft9sjz/image/upload/q_auto/f_auto/v1781548906/LOGO_PRINCIPAL_afltnu.png" style="width:150px; display:block; margin:auto;">
     <input type="text" id="nome" placeholder="Nome do Cliente">
     <input type="email" id="email" placeholder="Email">
     <input type="tel" id="whatsInput" placeholder="WhatsApp">
@@ -73,7 +73,7 @@ Tenha certeza da ordem das fotos enviadas. A retrospectiva será produzida exata
 Após assistir à retrospectiva final e informar que está tudo correto, não serão aceitas reclamações relacionadas à reprodução do vídeo no dia da festa. Problemas como: Pen drive corrompido, falha ao baixar ou transferir o arquivo, equipamentos com defeito, problemas de configuração, outros fatores externos, são de responsabilidade do cliente e não do fornecedor da retrospectiva. Ao aprovar a versão final, entende-se que o serviço foi concluído e entregue corretamente.</textarea>
     <canvas id="canvas"></canvas>
     <button onclick="clearCanvas()" style="background:#ff4757; margin-bottom:10px;">Limpar Assinatura</button>
-    <div style="background:#fff3cd; padding:10px;"><input type="checkbox" id="aceite"> <b>Declaro que li e concordo com os itens 1 ao 16.</b></div>
+    <div style="background:#fff3cd; padding:10px;"><input type="checkbox" id="aceite"> <b>Declaro que li e concordo com todas as cláusulas (itens 1 ao 16).</b></div>
     <button onclick="gerarPDF()">Gerar PDF e Enviar WhatsApp</button>
 </div>
 <script>
@@ -95,7 +95,7 @@ Após assistir à retrospectiva final e informar que está tudo correto, não se
         
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        doc.addImage("https://res.cloudinary.com/dtshawz5x/image/upload/v1780435649/logotipo_jhde8q.png", 'PNG', 80, 10, 50, 20);
+        doc.addImage("https://res.cloudinary.com/dlbft9sjz/image/upload/q_auto/f_auto/v1781548906/LOGO_PRINCIPAL_afltnu.png", 'PNG', 80, 10, 50, 20);
         
         // DADOS DO CLIENTE EXATOS
         doc.setFontSize(10);
