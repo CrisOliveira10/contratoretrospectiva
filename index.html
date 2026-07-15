@@ -43,7 +43,8 @@
 <body>
 
 <div class="container" id="formArea">
-    <img src="https://res.cloudinary.com/dtshawz5x/image/upload/v1778939341/capa-circulo_cblblr.png" class="logo" alt="Logo">
+    <!-- Adicionado ID na Logo para ler propriedades nativas de tamanho -->
+    <img src="https://res.cloudinary.com/dtshawz5x/image/upload/v1778939341/capa-circulo_cblblr.png" class="logo" id="logo-img-dom" alt="Logo">
     <h3 style="text-align:center; color:#333; margin-top:0;">DADOS DO EVENTO</h3>
     
     <div class="input-group">
@@ -176,7 +177,15 @@ Ao aprovar a versão final, o cliente atesta que todos os dados (nomes, datas, i
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const text = document.getElementById('sig-type-input').value;
         if (!text) return;
-        ctx.font = "40px 'Dancing Script', cursive";
+
+        // Controle Dinâmico: Reduz o tamanho da fonte para impedir corte de nomes muito longos
+        let fontSize = 40;
+        ctx.font = fontSize + "px 'Dancing Script', cursive";
+        while(ctx.measureText(text).width > canvas.width - 40 && fontSize > 15) {
+            fontSize--;
+            ctx.font = fontSize + "px 'Dancing Script', cursive";
+        }
+
         ctx.fillStyle = "#000";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -257,7 +266,7 @@ Ao aprovar a versão final, o cliente atesta que todos os dados (nomes, datas, i
         try {
             currentSig = canvas.toDataURL('image/png');
             
-            // Dados de Rastreio (Evoluído com Fallback/Plano B)
+            // Dados de Rastreio (Evoluído com Fallback/Plano B de blindagem)
             let ipUser = "Não identificado";
             let localUser = "Não identificada";
             
@@ -270,7 +279,7 @@ Ao aprovar a versão final, o cliente atesta que todos os dados (nomes, datas, i
                     localUser = dataIp.city + " - " + dataIp.region;
                 }
             } catch(e) {
-                // Plano B: Se o bloqueador de anúncios barrar o GeoJS, puxa apenas o IP
+                // Plano B: Se o bloqueador de anúncios barrar o GeoJS, puxa apenas o IP via API Ipify
                 console.warn("Aviso: GeoJS bloqueado ou falhou. Tentando IPify...");
                 try {
                     const resIpBackup = await fetch('https://api.ipify.org?format=json');
@@ -288,19 +297,28 @@ Ao aprovar a versão final, o cliente atesta que todos os dados (nomes, datas, i
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Logo
-            doc.addImage("https://res.cloudinary.com/dtshawz5x/image/upload/v1778939341/capa-circulo_cblblr.png", 'PNG', 80, 10, 50, 18);
+            // Lógica inteligente para manter a proporção real da Logomarca
+            const logoUrl = "https://res.cloudinary.com/dtshawz5x/image/upload/v1778939341/capa-circulo_cblblr.png";
+            const logoDom = document.getElementById('logo-img-dom');
+            let logoW = logoDom.naturalWidth || 100;
+            let logoH = logoDom.naturalHeight || 36;
+            let finalLogoW = 50; // Largura limite controlada
+            let finalLogoH = (logoH * finalLogoW) / logoW; // Altura gerada inteligentemente com base na proporção da largura original
             
-            // Título
+            // Injeta imagem centralizada sem comprimir
+            doc.addImage(logoUrl, 'PNG', (210 - finalLogoW) / 2, 10, finalLogoW, finalLogoH);
+            
+            // Desloca o Título do Contrato para baixo caso a logo gerada seja muito alta verticalmente
+            let startY = Math.max(40, 10 + finalLogoH + 10);
             doc.setFontSize(14);
             doc.setFont("helvetica", "bold");
-            doc.text("CONTRATO DE PRESTAÇÃO DE SERVIÇOS", 105, 40, {align:'center'});
+            doc.text("CONTRATO DE PRESTAÇÃO DE SERVIÇOS", 105, startY, {align:'center'});
             
             // Cabeçalho de Dados
             doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
             
-            let y = 50;
+            let y = startY + 10;
             doc.text("CONTRATANTE: " + nome, 15, y); y += 6;
             doc.text("ANIVERSARIANTE: " + aniversario, 15, y); y += 6;
             doc.text("IDADE A COMEMORAR: " + (idade || 'Não informada'), 15, y); y += 6;
@@ -329,15 +347,15 @@ Ao aprovar a versão final, o cliente atesta que todos os dados (nomes, datas, i
                 y += 6; 
             });
             
-            // Assinatura na página de texto
+            // Assinatura na página de texto - Dimensões ampliadas para não espremer nomes longos digitados
             if (y + 35 > 280) { doc.addPage(); y = 20; }
             doc.text("De acordo,", 15, y + 10);
             doc.text(nome, 15, y + 15);
-            doc.addImage(currentSig, 'PNG', 15, y + 18, 45, 18);
+            doc.addImage(currentSig, 'PNG', 15, y + 18, 70, 17.5);
 
             // Página Exclusiva: RELATÓRIO DE ASSINATURA
             doc.addPage();
-            doc.rect(10, 10, 190, 105); // Aumentado para caber a localização
+            doc.rect(10, 10, 190, 105);
             
             doc.setFontSize(16); 
             doc.text("RELATÓRIO DE ASSINATURA DIGITAL", 105, 25, {align: 'center'});
@@ -350,17 +368,17 @@ Ao aprovar a versão final, o cliente atesta que todos os dados (nomes, datas, i
             doc.text("Data da Assinatura: " + dataFormatada, 20, 77);
             doc.text("Hash de Validação: " + hashAssinatura, 20, 85);
             doc.text("IP do Signatário: " + ipUser, 20, 93);
-            doc.text("Localização (IP): " + localUser, 20, 101); // Nova linha
+            doc.text("Localização (IP): " + localUser, 20, 101);
             
-            // Quadro da Assinatura no Relatório
-            doc.rect(145, 40, 45, 22);
-            doc.text("Assinatura", 167.5, 45, {align: 'center'});
-            doc.addImage(currentSig, 'PNG', 147.5, 48, 40, 12);
+            // Quadro da Assinatura no Relatório ampliado proporcionalmente ao canvas 
+            doc.rect(125, 40, 70, 25);
+            doc.text("Assinatura", 160, 45, {align: 'center'});
+            doc.addImage(currentSig, 'PNG', 127.5, 48, 65, 16.25);
             
             // Rodapé com o nome da empresa
             doc.setFontSize(9);
             doc.setTextColor(100);
-            doc.text("Cristiane Oliveira | Contato: (71) 9.9323-3142", 105, 125, {align: 'center'});
+            doc.text("Cris oliveira | Contato: 71993233142", 105, 125, {align: 'center'});
 
             // Finalizar tela e Baixar
             const randomId = Math.random().toString(36).substring(2, 7).toUpperCase();
