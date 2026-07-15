@@ -2,149 +2,379 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Contrato de Prestação de Serviços</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background: #fff; padding: 20px; }
-        .container { max-width: 600px; margin: auto; }
-        canvas { border: 2px solid #ccc; width: 100%; height: 200px; touch-action: none; background: #fafafa; }
-        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; box-sizing: border-box; }
-        button { background: #25d366; color: white; padding: 15px; width: 100%; border: none; cursor: pointer; }
+        /* Uso do dvh para evitar cortes no Safari Mobile */
+        body { font-family: 'Helvetica', sans-serif; background: #eef2f3; padding: 15px; margin: 0; display: flex; justify-content: center; min-height: 100dvh; }
+        .container { max-width: 600px; width: 100%; background: #fff; padding: 25px; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .logo { width: 160px; display: block; margin: 0 auto 20px auto; }
+        
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #333; }
+        input[type="text"], input[type="email"], input[type="tel"], input[type="date"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 14px; }
+        
+        /* Box ajustado para expansão automática */
+        .termos-box { background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; line-height: 1.6; color: #333; height: auto; overflow: visible; white-space: pre-wrap; margin-bottom: 20px; text-align: justify; }
+        
+        canvas { border: 2px solid #ccc; width: 100%; height: 150px; background: #fff; touch-action: none; border-radius: 5px; box-sizing: border-box; margin-bottom: 15px; }
+        
+        .checkbox-container { display: flex; align-items: flex-start; background: #e8f5e9; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #c8e6c9; }
+        .checkbox-container input { margin-top: 3px; margin-right: 10px; width: 18px; height: 18px; }
+        .checkbox-container label { font-size: 13px; color: #2e7d32; font-weight: bold; cursor: pointer; line-height: 1.4; }
+        
+        .btn-group { display: flex; gap: 10px; }
+        .btn-group button { flex: 1; padding: 15px; border: none; border-radius: 5px; font-weight: bold; font-size: 15px; cursor: pointer; color: white; transition: 0.3s; }
+        .btn-limpar { background: #dc3545; }
+        .btn-gerar { background: #28a745; }
+        
+        #sucessoArea { display: none; text-align: center; padding: 40px 20px; }
+
+        /* Estilos para abas de assinatura */
+        .sig-controls { display: flex; gap: 5px; margin-bottom: 10px; }
+        .sig-btn { flex: 1; padding: 10px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; color: #555; transition: 0.2s; }
+        .sig-btn.active { background: #333; color: #fff; border-color: #333; }
+        .sig-input-area { margin-bottom: 10px; display: none; }
+        .sig-input-area input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 14px; }
     </style>
 </head>
 <body>
-<div class="container">
-    <img src="https://res.cloudinary.com/dlbft9sjz/image/upload/q_auto/f_auto/v1781548906/LOGO_PRINCIPAL_afltnu.png" style="width:150px; display:block; margin:auto;">
+
+<div class="container" id="formArea">
+    <img src="https://res.cloudinary.com/dtshawz5x/image/upload/v1778939341/capa-circulo_cblblr.png" class="logo" alt="Logo">
+    <h3 style="text-align:center; color:#333; margin-top:0;">DADOS DO EVENTO</h3>
     
-    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">Nome do Cliente:</label>
-    <input type="text" id="nome">
-    
-    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">Email:</label>
-    <input type="email" id="email">
-    
-    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">WhatsApp:</label>
-    <input type="tel" id="whatsInput">
-    
-    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">Data do Evento:</label>
-    <input type="date" id="dataEvento">
-    
-    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">Tema da Festa:</label>
-    <input type="text" id="tema">
-    
-    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">Termos do Contrato:</label>
-    <textarea id="termosArea" readonly style="height:100px; font-size:10px;"># REGRAS E INFORMAÇÕES DA RETROSPECTIVA
-
-1. Informações Visuais da Festa
-Você deverá me enviar informações visuais da festa para que eu possa entender a proposta do evento. Exemplos: Fotos da decoração; Convite da festa.
-
-2. Modelo da Retrospectiva
-Vou lhe apresentar um modelo que possuo dentro do tema escolhido. Caso eu não tenha um modelo específico, você poderá visualizar meus trabalhos e avaliações através do primeiro post do meu Instagram, onde também há diversos exemplos disponíveis. Importante: Os modelos servem apenas como base. Músicas, textos serão personalizados para o seu evento.
-
-3. Valores e Prazos
-Vou te passar valores, prazos e tudo que preciso para a produção da sua retrospectiva.
-
-4. Trechos Animados
-Os trechos animados são recursos antigos utilizados em retrospectivas. Além de aumentarem a duração do vídeo, podem acabar ficando um pouco fora do tema. Porém, caso deseje incluí-los, faremos com todo prazer. Basta informar no momento do envio das fotos. Serão inseridos, em média, de 3 a 5 trechos animados, dependendo da quantidade de fotos e da coerência com a história apresentada.
-
-5. Envio das Fotos
-As fotos devem ser enviadas na mesma ordem em que deseja que apareçam na retrospectiva. Envie em uma pasta as fotos numeradas, ou no whatsapp na ordem que devem aparecer na retro. Importante: Não organizo fotos para clientes.
-
-6. Vídeos e Legendas
-- Incluímos até 4 vídeos pessoais sem custo adicional.
-- Acima dessa quantidade, será cobrada uma taxa de R$ 5,99 por vídeo excedente.
-- Também inserimos entre 5 e 10 legendas ao longo da retrospectiva, dependendo da quantidade de fotos enviadas.
-
-7. Tempo da Retrospectiva
-O tempo final varia de acordo com: quantidade de fotos, vídeos, tamanho dos textos e inclusão de trechos animados. Tempo médio para retrospectivas contendo apenas fotos: 80 fotos: 7 a 8 min; 100 fotos: 8 a 10 min; 120 fotos: 10 a 12 min; 150 fotos: 12 a 15 min; 200 fotos: 15 a 20 min. Observação: A inclusão de vídeos pessoais, trechos animados e textos longos aumenta a duração total.
-
-8. Início do Prazo
-O prazo de produção começa a contar a partir do recebimento de: todas as informações solicitadas, fotos e materiais necessários, e pagamento do sinal ou valor integral.
-
-9. Prévia para Aprovação
-Será enviada uma prévia para aprovação. Caso seja necessário algum ajuste, ele será realizado e uma nova versão será enviada. Após a aprovação, será entregue a versão final.
-
-10. Alterações Após a Entrega Final
-Após o envio da retrospectiva final, qualquer alteração solicitada estará sujeita à cobrança de taxa adicional.
-
-11. Entrega da Retrospectiva
-A retrospectiva será entregue em formato MP4. Importante: Teste a retrospectiva no equipamento que será utilizado na festa. Não me responsabilizo pela qualidade, configuração ou funcionamento dos aparelhos utilizados no evento. O arquivo será enviado pelo WhatsApp; ou por um link de download enviado por e-mail, válido por 7 dias.
-
-12. Moldura para Fotos (Brinde)
-A moldura para fotos é um brinde e será criada de acordo com o tema da festa. Por se tratar de um brinde, não serão realizadas alterações ou personalizações. Você receberá um link para acesso à moldura e uma arte para impressão contendo um QR Code. Importante: Não me responsabilizo por problemas de funcionamento decorrentes de aparelhos dos convidados ou instabilidades de internet.
-
-13. Armazenamento dos Arquivos
-Não armazeno fotos nem retrospectivas dos clientes. Após 15 dias da entrega, todos os arquivos serão excluídos do meu computador. Por isso, após receber o material, faça o download e mantenha uma cópia salva em local seguro.
-
-14. Alterações no Modelo
-Qualquer modificação no modelo escolhido deverá ser informada antes do início da produção da prévia.
-
-15. Ordem das Fotos
-Tenha certeza da ordem das fotos enviadas. A retrospectiva será produzida exatamente na sequência em que as fotos forem recebidas. Caso, após assistir à prévia, seja constatado que as fotos foram enviadas em ordem incorreta, será cobrada uma taxa para reorganização e nova edição.
-
-16. Responsabilidade Após Aprovação Final
-Após assistir à retrospectiva final e informar que está tudo correto, não serão aceitas reclamações relacionadas à reprodução do vídeo no dia da festa. Problemas como: Pen drive corrompido, falha ao baixar ou transferir o arquivo, equipamentos com defeito, problemas de configuração, outros fatores externos, são de responsabilidade do cliente e não do fornecedor da retrospectiva. Ao aprovar a versão final, entende-se que o serviço foi concluído e entregue corretamente.
-
-Assinatura</textarea>
-    
-    <canvas id="canvas"></canvas>
-    <button onclick="clearCanvas()" style="background:#ff4757; margin-bottom:10px;">Limpar Assinatura</button>
-    
-    <div style="background:#fff3cd; padding:10px; border-radius:5px; margin-bottom:10px;">
-        <input type="checkbox" id="aceite" style="width:auto; margin-right:10px;"> 
-        <b>Declaro que li e concordo com os itens 1 ao 16.</b>
+    <div class="input-group">
+        <label>Nome do Contratante:</label>
+        <input type="text" id="nomeContratante" placeholder="Seu nome completo">
+    </div>
+    <div class="input-group">
+        <label>E-mail:</label>
+        <input type="email" id="email" placeholder="seuemail@exemplo.com">
+    </div>
+    <div class="input-group">
+        <label>WhatsApp:</label>
+        <input type="tel" id="whatsapp" placeholder="(00) 00000-0000">
     </div>
     
-    <button onclick="gerarPDF()">Gerar PDF e Enviar WhatsApp</button>
-</div><script>
-    const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d'); ctx.lineWidth = 3; let drawing = false;
-    function getPos(e) { const r = canvas.getBoundingClientRect(); const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left; const y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top; return {x, y}; }
-    canvas.onmousedown = (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); };
-    canvas.onmousemove = (e) => { if(!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+    <div style="display:flex; gap:10px;">
+        <div class="input-group" style="flex:2;">
+            <label>Nome do Aniversariante:</label>
+            <input type="text" id="nomeAniversariante" placeholder="Nome da criança/aniversariante">
+        </div>
+        <div class="input-group" style="flex:1;">
+            <label>Idade:</label>
+            <input type="text" id="idade" placeholder="Ex: 5 anos">
+        </div>
+    </div>
+    
+    <div style="display:flex; gap:10px;">
+        <div class="input-group" style="flex:1;">
+            <label>Data do Evento:</label>
+            <input type="date" id="dataEvento">
+        </div>
+        <div class="input-group" style="flex:1;">
+            <label>Tema da Festa:</label>
+            <input type="text" id="temaEvento" placeholder="Ex: Safari">
+        </div>
+    </div>
+
+    <h3 style="text-align:center; color:#333; margin-top:10px;">TERMOS DO CONTRATO</h3>
+    <div class="termos-box" id="textoContrato"># REGRAS E INFORMAÇÕES DA PRESTAÇÃO DE SERVIÇOS
+
+1. Informações Visuais da Festa
+Você deverá me enviar informações visuais da festa para que eu possa entender a proposta do evento. Exemplos: Fotos da decoração; Inspirações do convite.
+
+2. Modelo e Aprovação
+Vou lhe apresentar um modelo ou prévia baseada no tema escolhido. Músicas, textos e layouts serão personalizados para o seu evento.
+
+3. Valores e Prazos
+O prazo de produção começa a contar a partir do recebimento de todas as informações solicitadas, fotos, textos e a confirmação do pagamento do sinal ou valor integral.
+
+4. Envio de Materiais
+Fotos e textos devem ser enviados com clareza e na ordem desejada. Revise a grafia dos nomes e dados do evento (Data, Hora e Local) antes do envio.
+
+5. Prévia para Aprovação
+Será enviada uma prévia para aprovação. Caso seja necessário algum ajuste, ele será realizado e uma nova versão será enviada. Após a aprovação definitiva, será entregue a versão final em alta resolução.
+
+6. Alterações Após a Entrega Final
+Após o envio do arquivo final aprovado, qualquer alteração solicitada (mudança de data, local, etc.) estará sujeita à cobrança de taxa adicional de alteração.
+
+7. Responsabilidade do Cliente
+Ao aprovar a versão final, o cliente atesta que todos os dados (nomes, datas, idades e endereços) estão corretos. Não nos responsabilizamos por erros identificados após a aprovação e envio do arquivo final.</div>
+    
+    <label style="font-size:13px; font-weight:bold; color:#333; display:block; margin-bottom:5px;">Assinatura Digital:</label>
+    
+    <div class="sig-controls">
+        <button class="sig-btn active" id="btn-sig-draw" onclick="setSigMode('draw')">✎ Desenhar</button>
+        <button class="sig-btn" id="btn-sig-type" onclick="setSigMode('type')">⌨ Digitar</button>
+        <button class="sig-btn" id="btn-sig-upload" onclick="setSigMode('upload')">📁 Enviar Foto</button>
+    </div>
+
+    <div id="sig-type-container" class="sig-input-area">
+        <input type="text" id="sig-type-input" placeholder="Digite seu nome completo aqui..." oninput="updateTypeSig()">
+    </div>
+
+    <div id="sig-upload-container" class="sig-input-area">
+        <input type="file" id="sig-file-input" accept="image/*" onchange="updateUploadSig(event)">
+    </div>
+
+    <canvas id="canvas"></canvas>
+    
+    <div class="checkbox-container">
+        <input type="checkbox" id="aceite"> 
+        <label for="aceite">Declaro que li e concordo com todas as regras de prestação de serviço acima estabelecidas.</label>
+    </div>
+    
+    <div class="btn-group">
+        <button class="btn-limpar" onclick="limparCanvas()">Limpar Assinatura</button>
+        <button class="btn-gerar" id="btnFinalizar" onclick="finalizarContrato()">Finalizar e Baixar PDF</button>
+    </div>
+</div>
+
+<div class="container" id="sucessoArea">
+    <img src="https://res.cloudinary.com/dtshawz5x/image/upload/v1778939341/capa-circulo_cblblr.png" class="logo" alt="Logo">
+    <h2 style="color:#28a745;">✓ Contrato Assinado!</h2>
+    <p>O documento foi gerado e baixado para o seu dispositivo.</p>
+    <p style="font-size:13px; color:#666;">Agradecemos a confiança.</p>
+</div>
+
+<script>
+    let currentSig = "";
+    let sigMode = 'draw';
+    const canvas = document.getElementById('canvas'); 
+    const ctx = canvas.getContext('2d'); 
+    
+    // Ajuste perfeito do Canvas
+    setTimeout(() => {
+        canvas.width = canvas.offsetWidth || 600;
+        canvas.height = canvas.offsetHeight || 150;
+    }, 100);
+
+    ctx.strokeStyle = '#000'; 
+    ctx.lineWidth = 2;
+    let drawing = false;
+
+    function setSigMode(mode) {
+        sigMode = mode;
+        document.getElementById('btn-sig-draw').classList.remove('active');
+        document.getElementById('btn-sig-type').classList.remove('active');
+        document.getElementById('btn-sig-upload').classList.remove('active');
+        document.getElementById('btn-sig-' + mode).classList.add('active');
+
+        document.getElementById('sig-type-container').style.display = mode === 'type' ? 'block' : 'none';
+        document.getElementById('sig-upload-container').style.display = mode === 'upload' ? 'block' : 'none';
+
+        limparCanvas();
+        if(mode === 'type') updateTypeSig();
+    }
+
+    function updateTypeSig() {
+        if (sigMode !== 'type') return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const text = document.getElementById('sig-type-input').value;
+        if (!text) return;
+        ctx.font = "40px 'Dancing Script', cursive";
+        ctx.fillStyle = "#000";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+    }
+
+    function updateUploadSig(e) {
+        if (sigMode !== 'upload') return;
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+                const drawWidth = img.width * scale;
+                const drawHeight = img.height * scale;
+                const x = (canvas.width - drawWidth) / 2;
+                const y = (canvas.height - drawHeight) / 2;
+                ctx.drawImage(img, x, y, drawWidth, drawHeight);
+            }
+            img.src = event.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+    
+    function getPos(e) { 
+        const rect = canvas.getBoundingClientRect(); 
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX); 
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY); 
+        return { 
+            x: (clientX - rect.left) * scaleX, 
+            y: (clientY - rect.top) * scaleY 
+        }; 
+    }
+    
+    canvas.onmousedown = (e) => { if(sigMode !== 'draw') return; drawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); };
+    canvas.onmousemove = (e) => { if(drawing && sigMode === 'draw') { const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); } };
     canvas.onmouseup = () => drawing = false;
-    canvas.ontouchstart = (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); };
-    canvas.ontouchmove = (e) => { e.preventDefault(); if(!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
-    canvas.ontouchend = () => drawing = false;
-    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    canvas.onmouseout = () => drawing = false;
+    
+    canvas.addEventListener("touchstart", (e) => { if(sigMode !== 'draw') return; drawing = true; const pos = getPos(e.touches[0]); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); e.preventDefault(); }, {passive: false});
+    canvas.addEventListener("touchmove", (e) => { if(drawing && sigMode === 'draw') { const pos = getPos(e.touches[0]); ctx.lineTo(pos.x, pos.y); ctx.stroke(); e.preventDefault(); } }, {passive: false});
+    canvas.addEventListener("touchend", () => { drawing = false; });
+    
+    function limparCanvas() { 
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
+        if(sigMode === 'type') {
+            document.getElementById('sig-type-input').value = '';
+        } else if(sigMode === 'upload') {
+            document.getElementById('sig-file-input').value = '';
+        }
+    }
 
-    async function gerarPDF() {
-        if(!document.getElementById('aceite').checked) { alert('Marque o aceite!'); return; }
-        const res = await fetch('https://api.ipify.org?format=json');
-        const ip = (await res.json()).ip;
-        const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(document.getElementById('nome').value + ip)))).map(b => b.toString(16).padStart(2, '0')).join('');
+    async function finalizarContrato() {
+        // Validações
+        const nome = document.getElementById('nomeContratante').value;
+        const email = document.getElementById('email').value;
+        const aniversario = document.getElementById('nomeAniversariante').value;
+        const idade = document.getElementById('idade').value;
+        const data = document.getElementById('dataEvento').value;
+        const tema = document.getElementById('temaEvento').value;
         
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.addImage("https://res.cloudinary.com/dlbft9sjz/image/upload/q_auto/f_auto/v1781548906/LOGO_PRINCIPAL_afltnu.png", 'PNG', 80, 10, 50, 20);
+        if(!nome || !email || !aniversario) { alert('Por favor, preencha os dados principais (Contratante, E-mail e Aniversariante).'); return; }
+        if(!document.getElementById('aceite').checked) { alert('Você precisa marcar a caixa de aceite dos termos.'); return; }
         
-        // DADOS DO CLIENTE EXATOS
-        doc.setFontSize(10);
-        doc.text("DADOS DO CLIENTE", 10, 40);
-        doc.text("Nome: " + document.getElementById('nome').value, 10, 45);
-        doc.text("Email: " + document.getElementById('email').value, 10, 50);
-        doc.text("WhatsApp: " + document.getElementById('whatsInput').value, 10, 55);
-        doc.text("Data: " + document.getElementById('dataEvento').value, 10, 60);
-        doc.text("Tema: " + document.getElementById('tema').value, 10, 65);
-        doc.text("Aceite: Cliente assinou e concordou com as regras.", 10, 70);
-        doc.text("IP: " + ip, 10, 75);
-        doc.text("Hash: " + hash.substring(0,20) + "...", 10, 80);
-        
-        // TERMOS COMPLETOS
-        let y = 90;
-        doc.splitTextToSize(document.getElementById('termosArea').value, 180).forEach(l => { 
-            if(y > 270) { doc.addPage(); y = 20; }
-            doc.text(l, 10, y); 
-            y += 5; 
-        });
-        
-        doc.addImage(canvas.toDataURL(), 'PNG', 10, y + 10, 50, 20);
-        // Rodapé Fixo
-        doc.setFontSize(8);
-        doc.text("Drika Artes Retrospectiva - Adriana contato (55)1195067-3897", 105, 290, {align: 'center'});
-        doc.save('Contrato.pdf');
+        // Verifica se desenhou ou preencheu algo
+        const blankCanvas = document.createElement('canvas');
+        blankCanvas.width = canvas.width; blankCanvas.height = canvas.height;
+        if(canvas.toDataURL() === blankCanvas.toDataURL()) { alert('Por favor, adicione sua assinatura no quadro.'); return; }
 
-        // MENSAGEM WHATSAPP EXATA
-        const msg = `*CONTRATO ASSINADO*%0A%0ADADOS DO CLIENTE%0ANome: ${document.getElementById('nome').value}%0AEmail: ${document.getElementById('email').value}%0AWhatsApp: ${document.getElementById('whatsInput').value}%0AData: ${document.getElementById('dataEvento').value}%0ATema: ${document.getElementById('tema').value}%0AAceite: Cliente assinou e concordou com as regras.%0AIP: ${ip}%0AHash: ${hash.substring(0,20)}...%0A%0ADeclaro que li e concordo com Termos aceitos (1-16)`;
-        window.open('https://wa.me/5511950673897?text=' + msg);
+        document.getElementById('btnFinalizar').innerText = "Gerando PDF...";
+        document.getElementById('btnFinalizar').disabled = true;
+
+        try {
+            currentSig = canvas.toDataURL('image/png');
+            
+            // Dados de Rastreio (Evoluído com Fallback/Plano B)
+            let ipUser = "Não identificado";
+            let localUser = "Não identificada";
+            
+            try {
+                // Tenta buscar IP + Cidade + Estado no GeoJS
+                const resIp = await fetch('https://get.geojs.io/v1/ip/geo.json');
+                const dataIp = await resIp.json();
+                ipUser = dataIp.ip || "Não identificado";
+                if(dataIp.city && dataIp.region) {
+                    localUser = dataIp.city + " - " + dataIp.region;
+                }
+            } catch(e) {
+                // Plano B: Se o bloqueador de anúncios barrar o GeoJS, puxa apenas o IP
+                console.warn("Aviso: GeoJS bloqueado ou falhou. Tentando IPify...");
+                try {
+                    const resIpBackup = await fetch('https://api.ipify.org?format=json');
+                    ipUser = (await resIpBackup.json()).ip;
+                } catch(e2) {
+                    console.warn("Aviso: Nenhum serviço de rastreio de IP respondeu.");
+                }
+            }
+
+            const dataAtual = new Date();
+            const dataFormatada = dataAtual.toLocaleDateString('pt-BR') + ', ' + dataAtual.toLocaleTimeString('pt-BR');
+            const hashAssinatura = Math.random().toString(36).substring(2, 12).toUpperCase() + "EVNT";
+
+            // Geração PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Logo
+            doc.addImage("https://res.cloudinary.com/dtshawz5x/image/upload/v1778939341/capa-circulo_cblblr.png", 'PNG', 80, 10, 50, 18);
+            
+            // Título
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.text("CONTRATO DE PRESTAÇÃO DE SERVIÇOS", 105, 40, {align:'center'});
+            
+            // Cabeçalho de Dados
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            
+            let y = 50;
+            doc.text("CONTRATANTE: " + nome, 15, y); y += 6;
+            doc.text("ANIVERSARIANTE: " + aniversario, 15, y); y += 6;
+            doc.text("IDADE A COMEMORAR: " + (idade || 'Não informada'), 15, y); y += 6;
+            doc.text("TEMA DO EVENTO: " + (tema || 'Não informado'), 15, y); y += 6;
+            
+            // Formatar Data do Evento do input type="date"
+            let dataEv = data ? data.split('-').reverse().join('/') : 'Não informada';
+            doc.text("DATA DO EVENTO: " + dataEv, 15, y); y += 6;
+            
+            doc.text("E-MAIL: " + email, 15, y); y += 6;
+            doc.text("WHATSAPP: " + (document.getElementById('whatsapp').value || 'Não informado'), 15, y); y += 12;
+            
+            // Linha divisória
+            doc.line(15, y, 195, y); y += 8;
+
+            // Texto do Contrato com Paginação Dinâmica
+            const textoCompleto = document.getElementById('textoContrato').innerText;
+            const lines = doc.splitTextToSize(textoCompleto, 180);
+            
+            lines.forEach(line => { 
+                if (y > 270) { 
+                    doc.addPage(); 
+                    y = 20; 
+                } 
+                doc.text(line, 15, y); 
+                y += 6; 
+            });
+            
+            // Assinatura na página de texto
+            if (y + 35 > 280) { doc.addPage(); y = 20; }
+            doc.text("De acordo,", 15, y + 10);
+            doc.text(nome, 15, y + 15);
+            doc.addImage(currentSig, 'PNG', 15, y + 18, 45, 18);
+
+            // Página Exclusiva: RELATÓRIO DE ASSINATURA
+            doc.addPage();
+            doc.rect(10, 10, 190, 105); // Aumentado para caber a localização
+            
+            doc.setFontSize(16); 
+            doc.text("RELATÓRIO DE ASSINATURA DIGITAL", 105, 25, {align: 'center'});
+            
+            doc.setFontSize(11);
+            doc.text("Status: Assinado eletronicamente", 20, 45);
+            doc.text("Contratante: " + nome, 20, 53);
+            doc.text("E-mail: " + email, 20, 61);
+            doc.text("Aniversariante: " + aniversario, 20, 69);
+            doc.text("Data da Assinatura: " + dataFormatada, 20, 77);
+            doc.text("Hash de Validação: " + hashAssinatura, 20, 85);
+            doc.text("IP do Signatário: " + ipUser, 20, 93);
+            doc.text("Localização (IP): " + localUser, 20, 101); // Nova linha
+            
+            // Quadro da Assinatura no Relatório
+            doc.rect(145, 40, 45, 22);
+            doc.text("Assinatura", 167.5, 45, {align: 'center'});
+            doc.addImage(currentSig, 'PNG', 147.5, 48, 40, 12);
+            
+            // Rodapé com o nome da empresa
+            doc.setFontSize(9);
+            doc.setTextColor(100);
+            doc.text("Cristiane Oliveira | Contato: (71) 9.9323-3142", 105, 125, {align: 'center'});
+
+            // Finalizar tela e Baixar
+            const randomId = Math.random().toString(36).substring(2, 7).toUpperCase();
+            doc.save('Contrato_Evento_' + randomId + '.pdf');
+            
+            document.getElementById('formArea').style.display = 'none';
+            document.getElementById('sucessoArea').style.display = 'block';
+            
+        } catch(e) { 
+            console.error("Erro PDF:", e); 
+            alert("Erro ao gerar PDF. Verifique sua conexão."); 
+            document.getElementById('btnFinalizar').innerText = "Finalizar e Baixar PDF";
+            document.getElementById('btnFinalizar').disabled = false;
+        }
     }
 </script>
 </body>
